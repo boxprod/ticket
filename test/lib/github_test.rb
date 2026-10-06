@@ -40,6 +40,18 @@ class Ticket::GitHubTest < ActiveSupport::TestCase
     end
   end
 
+  test "takes a network failure for an outage" do
+    connection = Ticket::GitHub.new(token: "t", repository: "boxprod/dummy")
+    Net::HTTP.singleton_class.alias_method(:original_start, :start)
+    Net::HTTP.define_singleton_method(:start) { |*, **| raise Net::OpenTimeout, "execution expired" }
+    error = assert_raises(Ticket::GitHub::Error) { connection.create_issue(title: "T", body: "B") }
+    assert_not_kind_of Ticket::GitHub::Rejected, error
+    assert_includes error.message, "Net::OpenTimeout"
+  ensure
+    Net::HTTP.singleton_class.alias_method(:start, :original_start)
+    Net::HTTP.singleton_class.remove_method(:original_start)
+  end
+
   private
     def net_response(klass, code, body)
       klass.new("1.1", code, "").tap do |response|

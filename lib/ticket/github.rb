@@ -11,6 +11,9 @@ module Ticket
 
     API = URI("https://api.github.com")
 
+    # GitHub out of reach: worth trying again, like an answer in the 500s.
+    NETWORK_ERRORS = [ Net::OpenTimeout, Net::ReadTimeout, SocketError, SystemCallError, OpenSSL::SSL::SSLError, EOFError, IOError ].freeze
+
     def initialize(token:, repository:)
       @token = token
       @repository = repository
@@ -51,6 +54,8 @@ module Ticket
         Net::HTTP.start(API.host, API.port, use_ssl: true, open_timeout: 10, read_timeout: 20) do |http|
           http.request(request)
         end
+      rescue *NETWORK_ERRORS => error
+        raise Error, "GitHub could not be reached: #{error.class}: #{error.message}"
       end
   end
 end
