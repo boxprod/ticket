@@ -1,0 +1,24 @@
+en:
+  ticket:
+    widget:
+      button: Feedback
+      title: Send feedback
+      kinds:
+        bug: Something is wrong
+        idea: An idea
+        question: A question
+      description: What happened, or what would help?
+      description_hint: The page you are on and your browser are sent with it.
+      capture: Capture the screen
+      choose: Choose an image
+      paste_hint: or paste or drop an image here
+      remove: Remove
+      capture_failed: The screen could not be captured.
+      image_too_large: This image is too large.
+      submit: Send
+      sending: Sending…
+      sent: Thank you, it has been sent to the team.
+      signed_out: Your session has ended. Sign in again, then send it.
+      failed: It could not be sent. Try again in a moment.
+      close: Close
+      another: Send another

@@ -1,0 +1,24 @@
+fr:
+  ticket:
+    widget:
+      button: Signaler
+      title: Faire un retour
+      kinds:
+        bug: Quelque chose ne va pas
+        idea: Une idée
+        question: Une question
+      description: Que s’est-il passé, ou qu’est-ce qui aiderait ?
+      description_hint: La page où vous êtes et votre navigateur sont envoyés avec.
+      capture: Capturer l’écran
+      choose: Choisir une image
+      paste_hint: ou collez ou déposez une image ici
+      remove: Retirer
+      capture_failed: L’écran n’a pas pu être capturé.
+      image_too_large: Cette image est trop lourde.
+      submit: Envoyer
+      sending: Envoi…
+      sent: Merci, c’est transmis à l’équipe.
+      signed_out: Votre session a expiré. Reconnectez-vous, puis envoyez.
+      failed: L’envoi a échoué. Réessayez dans un instant.
+      close: Fermer
+      another: En envoyer un autre
