@@ -7,6 +7,7 @@ const MAX_ERRORS = 10
 // Kept at module level: Turbo replaces the element on every visit, the draft survives it.
 const draft = { open: false, kind: "bug", description: "", screenshot: null }
 const errors = []
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 function remember(message) {
   errors.push(`${new Date().toISOString()} ${message}`.slice(0, 500))
@@ -62,11 +63,6 @@ class TicketWidget extends HTMLElement {
     this.attachShadow({ mode: "open" })
     this.render()
     this.restore()
-  }
-
-  disconnectedCallback() {
-    document.removeEventListener("keydown", this.onKeydown)
-    document.removeEventListener("paste", this.onPaste)
   }
 
   t(key) {
@@ -143,18 +139,19 @@ class TicketWidget extends HTMLElement {
       this.takeFile(event.dataTransfer.files[0])
     })
 
-    this.onKeydown = (event) => {
-      if (!draft.open) return
-      if (event.key === "Escape") this.setOpen(false)
-      if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !this.els.form.hidden) this.submit()
+    // What is typed or pasted in the panel stays in it. Seen from the page, the focus is on
+    // <ticket-widget>, not on a field, so the page's own shortcuts would take these keys.
+    for (const type of ["keydown", "keyup", "keypress", "paste", "copy", "cut"]) {
+      this.els.panel.addEventListener(type, (event) => event.stopPropagation())
     }
-    this.onPaste = (event) => {
-      if (!draft.open) return
+    this.els.panel.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") { this.setOpen(false); this.els.toggle.focus() }
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !this.els.form.hidden) this.submit()
+    })
+    this.els.panel.addEventListener("paste", (event) => {
       const file = [...(event.clipboardData?.files || [])].find((item) => item.type.startsWith("image/"))
       if (file) { event.preventDefault(); this.takeFile(file) }
-    }
-    document.addEventListener("keydown", this.onKeydown)
-    document.addEventListener("paste", this.onPaste)
+    })
   }
 
   restore() {
@@ -199,20 +196,21 @@ class TicketWidget extends HTMLElement {
     }
   }
 
-  // The current tab, picked in the browser's own dialog. The panel steps aside while it is taken.
+  // The current tab, picked in the browser's own dialog. The widget steps aside once sharing starts:
+  // a still page sends frames only when it repaints, and hiding the widget is that repaint.
   async capture() {
     let stream
-    this.hidden = true
     try {
       stream = await navigator.mediaDevices.getDisplayMedia({
         video: { displaySurface: "browser" }, audio: false, preferCurrentTab: true, selfBrowserSurface: "include"
       })
+      this.hidden = true
       const video = document.createElement("video")
       video.muted = true
       video.srcObject = stream
-      await video.play()
-      // Let the browser's sharing prompt leave the picture. A still page sends no new frame, hence the timeout.
-      await new Promise((resolve) => setTimeout(resolve, 400))
+      await Promise.race([video.play(), wait(3000).then(() => { throw new Error("no frame") })])
+      // Let the browser's sharing bar leave the picture.
+      await wait(400)
       await new Promise((resolve) => { video.requestVideoFrameCallback?.(resolve); setTimeout(resolve, 300) })
       if (!video.videoWidth) throw new Error("no frame")
       this.setScreenshot(await this.encode(video, video.videoWidth, video.videoHeight))

@@ -39,4 +39,16 @@ class WidgetSystemTest < ApplicationSystemTestCase
     page.execute_script("const w = document.querySelector('ticket-widget'); const copy = w.cloneNode(); w.replaceWith(copy)")
     assert_equal "Half written", find("ticket-widget", visible: :all).shadow_root.find("textarea").value
   end
+
+  test "keeps what is typed in it from the page's shortcuts" do
+    page.execute_script("window.keysSeen = []; document.addEventListener('keydown', (e) => keysSeen.push(e.key))")
+    widget = find("ticket-widget", visible: :all).shadow_root
+    widget.find(".toggle").click
+    widget.find("textarea").send_keys("a/b")
+    assert_equal "a/b", widget.find("textarea").value
+    assert_empty page.evaluate_script("window.keysSeen")
+
+    widget.find("textarea").send_keys(:escape)
+    assert widget.has_css?(".panel[hidden]", visible: :all)
+  end
 end
