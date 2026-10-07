@@ -77,10 +77,4 @@ bin/rails test
 CHROMIUM=/usr/bin/chromium bin/rails test:system   # the widget in headless Chromium, tab capture included
 ```
 
-## Releasing
-
-```sh
-# bump lib/ticket/version.rb, commit, then:
-git tag -a vX.Y.Z -m "X.Y.Z" && git push origin main vX.Y.Z
-gem build ticket.gemspec && gem push ticket-X.Y.Z.gem   # asks for a one-time code
-```
+To release, bump `lib/ticket/version.rb`, commit, then `bundle exec rake release`: it tags, pushes the tag and pushes the gem to RubyGems, asking for a one-time code.
