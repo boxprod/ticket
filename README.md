@@ -60,22 +60,6 @@ Without a token, reports are kept in `ticket_reports` but not sent: that is what
 
 Create a fine-grained personal access token (GitHub → Settings → Developer settings) with **boxprod** as its resource owner (the organization must allow fine-grained tokens: Settings → Personal access tokens), limited to the app's repository, with **Issues: read and write** and nothing else. Issues are opened in the name of the token's owner; the reporter's name is in the body. If GitHub refuses the labels, the issue is filed without them.
 
-### Deploying with a private gem
-
-The Docker build runs `bundle install`, which has to fetch this private repository. Give it a token with **Contents: read** on `boxprod/ticket`:
-
-```dockerfile
-RUN --mount=type=secret,id=BUNDLE_GITHUB__COM \
-    BUNDLE_GITHUB__COM="$(cat /run/secrets/BUNDLE_GITHUB__COM)" bundle install && ...
-```
-
-```yaml
-# config/deploy.yml
-builder:
-  secrets:
-    - BUNDLE_GITHUB__COM   # "x-access-token:<token>", listed in .kamal/secrets
-```
-
 ### Reports that were not sent
 
 ```sh
