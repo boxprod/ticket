@@ -14,8 +14,10 @@ The widget is a plain JavaScript custom element in a shadow root, served by the 
 
 ```ruby
 # Gemfile
-gem "ticket", github: "boxprod/ticket"
+gem "ticket"
 ```
+
+Or `gem "ticket", github: "boxprod/ticket"` to follow `main` between releases.
 
 ```sh
 bundle install
@@ -73,4 +75,12 @@ bundle install
 bin/rails db:migrate
 bin/rails test
 CHROMIUM=/usr/bin/chromium bin/rails test:system   # the widget in headless Chromium, tab capture included
+```
+
+## Releasing
+
+```sh
+# bump lib/ticket/version.rb, commit, then:
+git tag -a vX.Y.Z -m "X.Y.Z" && git push origin main vX.Y.Z
+gem build ticket.gemspec && gem push ticket-X.Y.Z.gem   # asks for a one-time code
 ```
